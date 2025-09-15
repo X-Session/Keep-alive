@@ -1,0 +1,33 @@
+name: Keep Alive
+
+on:
+  schedule:
+    - cron: "*/1 * * * *"  #
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print timestamp
+        run: |
+          echo "⏰ Run started at: $(date -u)"
+
+      - name: Wait random delay
+        run: |
+          DELAY=$((RANDOM % 60))
+          echo "Waiting $DELAY seconds before ping..."
+          sleep $DELAY
+
+      - name: Curl ping with retry
+        run: |
+          URL="https://editorslab.store/"
+          echo "🌐 Target: $URL"
+          if curl -s --max-time 10 "$URL" > /dev/null; then
+            echo "✅ Ping successful at $(date -u)"
+          else
+            echo "⚠️ First attempt failed, retrying in 30s..."
+            sleep 30
+            curl -s --max-time 10 "$URL" > /dev/null \
+              && echo "✅ Second attempt successful at $(date -u)" \
+              || echo "❌ Second attempt failed at $(date -u)"
+          fi
